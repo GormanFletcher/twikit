@@ -1234,7 +1234,11 @@ class Client:
         """
         response = await self._get_tweet_detail(tweet_id, cursor)
 
-        entries = find_dict(response, 'entries')[0]
+        # This happened when fetching a deleted tweet
+        try:
+            entries = find_dict(response, 'entries')[0]
+        except IndexError:
+            raise NotAvailable()
         reply_to = []
         replies_list = []
         related_tweets = []
@@ -1242,6 +1246,9 @@ class Client:
 
         for entry in entries:
             if entry['entryId'].startswith('cursor'):
+                continue
+            # Not sure what's going on here but it's sure not a tweet
+            if entry.get('content').get('__typename') == 'TimelineTimelineModule':
                 continue
             tweet_info_ = find_dict(entry, 'result')
             if not tweet_info_:
