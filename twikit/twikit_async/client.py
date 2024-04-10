@@ -1238,7 +1238,7 @@ class Client:
         try:
             entries = find_dict(response, 'entries')[0]
         except IndexError:
-            raise NotAvailable()
+            raise TweetNotAvailable()
         reply_to = []
         replies_list = []
         related_tweets = []
@@ -1278,6 +1278,10 @@ class Client:
                     reply_to.append(tweet_object)
                 else:
                     replies_list.append(tweet_object)
+            
+        # A restricted-access tweet may not be present in the entries list
+        if not tweet:
+            raise TweetNotAvailable()
 
         if entries[-1]['entryId'].startswith('cursor'):
             # if has more replies
